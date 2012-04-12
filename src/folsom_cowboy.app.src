@@ -1,0 +1,12 @@
+{application, folsom_cowboy,
+ [
+  {description, ""},
+  {vsn, git},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, {folsom_cowboy_app, []}},
+  {env, [{health, {erlang, node, []}}]}
+ ]}.
