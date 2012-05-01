@@ -26,15 +26,16 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-run_test() ->
-
-    application:start(folsom_cowboy),
-
-    folsom_erlang_checks:create_metrics(),
-
-    folsom_erlang_checks:populate_metrics(),
-
-    ibrowse:start(),
-    folsom_http_checks:run(),
-    ibrowse:stop().
-
+run_test_() ->
+    {setup,
+     fun folsom_cowboy_app:start/0,
+     fun (_) -> folsom_cowboy_app:stop() end,
+     [{"create_metrics",
+       fun folsom_erlang_checks:create_metrics/0},
+      {"populate metrics",
+       {timeout, 30, fun folsom_erlang_checks:populate_metrics/0}},
+      {"http checks",
+       {setup,
+        fun ibrowse:start/0,
+        fun (_) -> ibrowse:stop() end,
+        [{timeout, 60, fun folsom_http_checks:run/0}]}}]}.
