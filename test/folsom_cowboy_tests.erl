@@ -27,9 +27,14 @@
 -include_lib("eunit/include/eunit.hrl").
 
 run_test_() ->
+    Apps = [cowboy, folsom, folsom_cowboy],
     {setup,
-     fun folsom_cowboy_app:start/0,
-     fun (_) -> folsom_cowboy_app:stop() end,
+     fun () ->
+             [ok = application:start(App) || App <- Apps]
+     end,
+     fun (_) ->
+             [ok = application:stop(App) || App <- lists:reverse(Apps)]
+     end,
      [{"create_metrics",
        fun folsom_erlang_checks:create_metrics/0},
       {"populate metrics",

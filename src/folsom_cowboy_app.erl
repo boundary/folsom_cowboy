@@ -30,17 +30,21 @@
 
 -export([start/2, stop/1]).
 
--include("folsom_cowboy.hrl").
+-define(APP, folsom_cowboy).
 
 start(_Type, _Args) ->
-    application:start(cowboy),
-
-    cowboy:start_listener(folsom_cowboy_listener, 100,
-                          cowboy_tcp_transport, [{port, ?PORT}],
-                          cowboy_http_protocol, [{dispatch, ?DISPATCH}]
+    cowboy:start_listener(folsom_cowboy_listener, env(num_acceptors),
+                          env(transport), [{port, env(port)} |
+                                           env(transport_options)],
+                          cowboy_http_protocol, [{dispatch, env(dispatch)}]
                          ),
-
     folsom_cowboy_sup:start_link().
 
 stop(_State) ->
     ok.
+
+env(Name) ->
+    case application:get_env(?APP, Name) of
+        {ok, Val} ->
+            Val
+    end.
