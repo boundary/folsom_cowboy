@@ -27,7 +27,7 @@
 -include_lib("eunit/include/eunit.hrl").
 
 run_test_() ->
-    Apps = [cowboy, folsom, folsom_cowboy],
+    Apps = [ranch, cowboy, folsom, folsom_cowboy],
     {setup,
      fun () ->
              [ok = application:start(App) || App <- Apps]
