@@ -35,7 +35,7 @@ handle(Req, State) ->
     {M, F, A} = proplists:get_value(health, Env, {erlang, node, []}),
     Result = erlang:apply(M, F, A),
 
-    {ok, Req2} = cowboy_http_req:reply(200, [], mochijson2:encode([{<<"health">>, Result}]), Req),
+    {ok, Req2} = cowboy_req:reply(200, [], mochijson2:encode([{<<"health">>, Result}]), Req),
     {ok, Req2, State}.
 
 terminate(_Req, _State) ->

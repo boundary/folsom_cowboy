@@ -32,7 +32,7 @@ init({_Any, http}, Req, []) ->
     {ok, Req, undefined}.
 
 handle(Req, State) ->
-    Info = cowboy_http_req:qs_val(<<"info">>, Req, undefined),
+    Info = cowboy_req:qs_val(<<"info">>, Req, undefined),
     {ok, Req2} = get_request(Info),
     {ok, Req2, State}.
 
@@ -40,6 +40,6 @@ terminate(_Req, _State) ->
     ok.
 
 get_request({<<"true">>, Req}) ->
-    cowboy_http_req:reply(200, [], mochijson2:encode(folsom_metrics:get_metrics_info()), Req);
+    cowboy_req:reply(200, [], mochijson2:encode(folsom_metrics:get_metrics_info()), Req);
 get_request({_, Req}) ->
-    cowboy_http_req:reply(200, [], mochijson2:encode(folsom_metrics:get_metrics()), Req).
+    cowboy_req:reply(200, [], mochijson2:encode(folsom_metrics:get_metrics()), Req).
