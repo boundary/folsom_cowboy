@@ -32,21 +32,22 @@ init({_Any, http}, Req, []) ->
     {ok, Req, undefined}.
 
 handle(Req, State) ->
-    Path = cowboy_http_req:path(Req),
-    {ok, Req2} = get_request(Path),
+    {Path, Req1} = cowboy_req:path(Req),
+    {ok, Req2} = get_request(Path, Req1),
     {ok, Req2, State}.
 
 terminate(_Req, _State) ->
     ok.
 
-get_request({[<<"_metrics">>, Id], Req}) ->
+get_request(Path, Req) ->
+    Id = lists:last(binary:split(Path, [<<"/">>], [trim,global])),
     case metric_exists(Id) of
         {true, Id1} ->
-            cowboy_http_req:reply(200, [], mochijson2:encode(get_metric_data(Id1)), Req);
+            cowboy_req:reply(200, [], mochijson2:encode(get_metric_data(Id1)), Req);
         {false, _} ->
-            cowboy_http_req:reply(404, [], mochijson2:encode([{error, nonexistent_metric}]), Req);
+            cowboy_req:reply(404, [], mochijson2:encode([{error, nonexistent_metric}]), Req);
         _ ->
-            cowboy_http_req:reply(404, [], mochijson2:encode([{error, nonexistent_metric}]), Req)
+            cowboy_req:reply(404, [], mochijson2:encode([{error, nonexistent_metric}]), Req)
     end.
 
 get_metric_data(Id) ->

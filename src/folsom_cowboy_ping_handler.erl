@@ -1,4 +1,4 @@
-%%%
+%%
 %%% Copyright 2011, Boundary
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,7 @@ init({_Any, http}, Req, []) ->
     {ok, Req, undefined}.
 
 handle(Req, State) ->
-    {ok, Req2} = cowboy_http_req:reply(200, [], mochijson2:encode([{<<"pong">>, ok}]), Req),
+    {ok, Req2} = cowboy_req:reply(200, [], mochijson2:encode([{<<"pong">>, ok}]), Req),
     {ok, Req2, State}.
 
 terminate(_Req, _State) ->
