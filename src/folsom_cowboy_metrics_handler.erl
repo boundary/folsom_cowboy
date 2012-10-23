@@ -40,7 +40,7 @@ terminate(_Req, _State) ->
     ok.
 
 get_request(Path, Req) ->
-    Id = lists:last(binary:split(Path, [<<"/">>], [trim,global])),
+    Id = cowboy_http:urldecode(lists:last(binary:split(Path, [<<"/">>], [trim,global]))),
     case metric_exists(Id) of
         {true, Id1} ->
             cowboy_req:reply(200, [], mochijson2:encode(get_metric_data(Id1)), Req);
