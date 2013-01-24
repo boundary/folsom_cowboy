@@ -34,7 +34,7 @@
 
 start(_Type, _Args) ->
     cowboy:start_http(folsom_cowboy_listener, env(num_acceptors),
-                      [{port, env(port)}], [{dispatch, env(dispatch)}]),
+                      [{port, env(port)}], [{env, [{dispatch, env(dispatch)}]}]),
     folsom_cowboy_sup:start_link().
 
 stop(_State) ->
