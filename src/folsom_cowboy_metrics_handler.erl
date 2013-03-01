@@ -26,7 +26,7 @@
 
 -module(folsom_cowboy_metrics_handler).
 -behaviour(cowboy_http_handler).
--export([init/3, handle/2, terminate/2]).
+-export([init/3, handle/2, terminate/3]).
 
 init({_Any, http}, Req, []) ->
     {ok, Req, undefined}.
@@ -36,11 +36,11 @@ handle(Req, State) ->
     {ok, Req2} = get_request(Path, Req1),
     {ok, Req2, State}.
 
-terminate(_Req, _State) ->
+terminate(_Reason, _Req, _State) ->
     ok.
 
 get_request(Path, Req) ->
-    Id = lists:last(binary:split(Path, [<<"/">>], [trim,global])),
+    Id = cowboy_http:urldecode(lists:last(binary:split(Path, [<<"/">>], [trim,global]))),
     case metric_exists(Id) of
         {true, Id1} ->
             cowboy_req:reply(200, [], mochijson2:encode(get_metric_data(Id1)), Req);
