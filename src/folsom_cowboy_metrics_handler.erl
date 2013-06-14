@@ -26,29 +26,27 @@
 
 -module(folsom_cowboy_metrics_handler).
 -behaviour(cowboy_http_handler).
--export([init/3, handle/2, terminate/2]).
+-export([init/3, handle/2, terminate/3]).
 
 init({_Any, http}, Req, []) ->
     {ok, Req, undefined}.
 
 handle(Req, State) ->
-    {Path, Req1} = cowboy_req:path(Req),
-    {ok, Req2} = get_request(Path, Req1),
+    {ok, Req2} = case cowboy_req:binding(metric_id, Req) of
+		     {undefined, Req1} ->
+			 cowboy_req:reply(404, [], mochijson2:encode([{error, nonexistent_metric}]), Req1);
+		     {Id, Req1} ->
+			 case metric_exists(Id) of
+			     {true, Id1} ->
+				 cowboy_req:reply(200, [], mochijson2:encode(get_metric_data(Id1)), Req1);
+			     {false, _} ->
+				 cowboy_req:reply(404, [], mochijson2:encode([{error, nonexistent_metric}]), Req1)
+			 end
+		 end,
     {ok, Req2, State}.
 
-terminate(_Req, _State) ->
+terminate(_Reason, _Req, _State) ->
     ok.
-
-get_request(Path, Req) ->
-    Id = lists:last(binary:split(Path, [<<"/">>], [trim,global])),
-    case metric_exists(Id) of
-        {true, Id1} ->
-            cowboy_req:reply(200, [], mochijson2:encode(get_metric_data(Id1)), Req);
-        {false, _} ->
-            cowboy_req:reply(404, [], mochijson2:encode([{error, nonexistent_metric}]), Req);
-        _ ->
-            cowboy_req:reply(404, [], mochijson2:encode([{error, nonexistent_metric}]), Req)
-    end.
 
 get_metric_data(Id) ->
     case folsom_metrics:get_metric_info(Id) of
