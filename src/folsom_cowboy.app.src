@@ -8,6 +8,9 @@
   {applications, [
                   kernel,
                   stdlib,
+                  crypto,
+                  ranch,
+                  cowlib,
                   cowboy,
                   folsom
                  ]},

@@ -8,7 +8,7 @@ Just add the folsom_cowboy to your app, in addition to its dependencies: [cowboy
 
         %% It's not typical to do this manually, but here's how:
         > lists:map(fun application:start/1,
-                [cowboy, folsom, folsom_cowboy]).
+                [cowlib, ranch, cowboy, folsom, folsom_cowboy]).
 
 You can configure the `port`, `transport`, `transport_options`, `num_acceptors` and `dispatch` in the `folsom_cowboy` application environment. This is typically done in your application's `sys.config`, but can also be specified on the command line:
 
