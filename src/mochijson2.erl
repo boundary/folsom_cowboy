@@ -187,6 +187,8 @@ json_encode_string(B, State) when is_binary(B) ->
     end;
 json_encode_string(I, _State) when is_integer(I) ->
     [?Q, integer_to_list(I), ?Q];
+json_encode_string(F, _State) when is_float(F) ->
+    [?Q, erlang:hd(io_lib:format("~p", [F])), ?Q];
 json_encode_string(L, State) when is_list(L) ->
     case json_string_is_safe(L) of
         true ->
