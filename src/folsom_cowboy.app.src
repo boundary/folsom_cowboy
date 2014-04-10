@@ -17,6 +17,7 @@
   {mod, {folsom_cowboy_app, []}},
   {env, [{health, {erlang, node, []}},
          {port, 5565},
+         {ip, {0,0,0,0}},
          {num_acceptors, 100},
          {transport, cowboy_tcp_transport},
          {transport_options, []},
