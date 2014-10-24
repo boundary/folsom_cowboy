@@ -3,6 +3,7 @@
  [
   {description, ""},
   {vsn, git},
+  {modules, []},
   {registered, [folsom_cowboy_listener,
                 folsom_cowboy_sup]},
   {applications, [
