@@ -10,7 +10,7 @@ Just add the folsom_cowboy to your app, in addition to its dependencies: [cowboy
         > lists:map(fun application:start/1,
                 [cowlib, ranch, cowboy, folsom, folsom_cowboy]).
 
-You can configure the `port`, `transport`, `transport_options`, `num_acceptors` and `dispatch` in the `folsom_cowboy` application environment. This is typically done in your application's `sys.config`, but can also be specified on the command line:
+You can configure the `port`, `transport`, `transport_options`, `num_acceptors`, `dispatch` and `enable_jsonp` in the `folsom_cowboy` application environment. This is typically done in your application's `sys.config`, but can also be specified on the command line:
 
         $ erl -pa ebin deps/*/ebin -folsom_cowboy port 8888
 
@@ -18,6 +18,7 @@ You can configure the `port`, `transport`, `transport_options`, `num_acceptors` 
 * `transport_options` is the options list to pass to that module (port is handled separately), such as `[{ip, {127, 0, 0, 1}}]`
 * `num_acceptors` is the number of acceptor processes to start for the listening socket (default is `100`)
 * `dispatch` is the `cowboy_http_module` dispatch tree, which you could use to change the URL scheme
+* `enable_jsonp` if true enable a flavour of [JSON with padding][jsonp] response (see [below](#JSONP)), false by default
 
 #### api
 
@@ -55,6 +56,15 @@ Query Erlang VM information:
          $ curl http://localhost:5565/_memory
          {"total":11044608,"processes":3240936,"processes_used":3233888,"system":7803672,"atom":532137,"atom_used":524918,"binary":696984,"code":4358030,"ets":385192}
 
+#### JSONP
+
+If enabled, you can request JSONP responses by including the query-string parameter:
+
+        $ curl http://localhost:5565/_metrics?jsonp=AvailableMetrics
+        AvailableMetrics=[]
+
+The returned javascript code is an assignment rather than a function call, so the parameter must be a valid javascript identified, in particular it must be a string of letters, digits or underscores, otherwise a `400` error is returned.
+
 [folsom_webmachine]: https://github.com/boundary/folsom_webmachine
 [folsom]: https://github.com/boundary/folsom
-[cowboy]: https://github.com/extend/cowboy
+[jsonp]: http://en.wikipedia.org/wiki/JSONP

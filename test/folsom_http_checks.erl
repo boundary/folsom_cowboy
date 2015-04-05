@@ -29,7 +29,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
--export([run/0]).
+-export([run/0, run_jsonp/0]).
 
 -define(SYSTEM_URL, "http://localhost:5565/_system").
 -define(STATISTICS_URL, "http://localhost:5565/_statistics").
@@ -55,6 +55,10 @@ run() ->
     %populate_metric(),
     %delete_metric().
 
+run_jsonp() ->
+    metrics_jsonp_checks(),
+    metrics_jsonp_invalid_pad_checks().
+
 metrics_checks() ->
     Body1 = http_helpers:http_get(?BASE_METRICS_URL),
     List1 = mochijson2:decode(Body1),
@@ -71,7 +75,13 @@ metrics_checks() ->
     Url2 = lists:append(io_lib:format("~s~s~p", [?BASE_METRICS_URL, "/", gauge])),
     Body3 = http_helpers:http_get(Url2),
     {struct, List3} = mochijson2:decode(Body3),
-    2 = proplists:get_value(<<"value">>, List3).
+    2 = proplists:get_value(<<"value">>, List3),
+
+    % check that json padding is not used when disabled
+    Url3 = lists:append(io_lib:format("~s~s~p~s", [?BASE_METRICS_URL, "/", gauge, "?jsonp=TestM"])),
+    Body4 = http_helpers:http_get(Url3),
+    {struct, List4} = mochijson2:decode(Body4),
+    2 = proplists:get_value(<<"value">>, List4).
 
 system_checks() ->
     % check _system stats
@@ -157,3 +167,28 @@ populate_metric() ->
 delete_metric() ->
     Url1 = lists:append(io_lib:format("~s~s", [?BASE_METRICS_URL, "/http"])),
     ok = http_helpers:http_delete(Url1).
+
+metrics_jsonp_checks() ->
+    Raw1 = http_helpers:http_get(?BASE_METRICS_URL++"?jsonp=TestP"),
+    ["TestP", Body1] = string:tokens(Raw1, "="),
+
+    List1 = mochijson2:decode(Body1),
+    true = lists:member(<<"counter">>, List1),
+    ?debugFmt("http: ~p~n", [List1]),
+
+    ?debugFmt("erlang: ~p~n", [folsom_metrics:get_metrics()]),
+
+    Url1 = lists:append(io_lib:format("~s~s~p", [?BASE_METRICS_URL, "/", counter])),
+    Body2 = http_helpers:http_get(Url1),
+    {struct, List2} = mochijson2:decode(Body2),
+    0 = proplists:get_value(<<"value">>, List2),
+
+    Url2 = lists:append(io_lib:format("~s~s~p~s", [?BASE_METRICS_URL, "/", gauge, "?jsonp=TestM"])),
+    Raw3 = http_helpers:http_get(Url2),
+    ["TestM", Body3] = string:tokens(Raw3, "="),
+    {struct, List3} = mochijson2:decode(Body3),
+    2 = proplists:get_value(<<"value">>, List3).
+
+metrics_jsonp_invalid_pad_checks() ->
+    error = http_helpers:http_get(?BASE_METRICS_URL++"?jsonp=Test{}").
+
