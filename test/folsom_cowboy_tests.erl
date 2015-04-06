@@ -26,15 +26,17 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-define(APPS, [cowlib, ranch, cowboy, bear, xmerl, folsom, folsom_cowboy]).
+
+start() ->
+    [ok = application:start(App) || App <- ?APPS].
+
+stop(_) ->
+    [ok = application:stop(App) || App <- lists:reverse(?APPS)].
+
+
 run_test_() ->
-    Apps = [cowlib, ranch, cowboy, folsom, folsom_cowboy],
-    {setup,
-     fun () ->
-             [ok = application:start(App) || App <- Apps]
-     end,
-     fun (_) ->
-             [ok = application:stop(App) || App <- lists:reverse(Apps)]
-     end,
+    {setup, fun start/0, fun stop/1,
      [{"create_metrics",
        fun folsom_erlang_checks:create_metrics/0},
       {"populate metrics",
@@ -44,3 +46,26 @@ run_test_() ->
         fun ibrowse:start/0,
         fun (_) -> ibrowse:stop() end,
         [{timeout, 60, fun folsom_http_checks:run/0}]}}]}.
+
+run_with_jsonp_test_() ->
+    {setup,
+     fun() ->
+        application:set_env(folsom_cowboy, enable_jsonp, true),
+        start()
+     end,
+
+     fun(S) ->
+        application:unset_env(folsom_cowboy, enable_jsonp),
+        stop(S)
+     end,
+
+     [{"create_metrics",
+       fun folsom_erlang_checks:create_metrics/0},
+      {"populate metrics",
+       {timeout, 30, fun folsom_erlang_checks:populate_metrics/0}},
+      {"jsonp checks",
+       {setup,
+        fun ibrowse:start/0,
+        fun (_) -> ibrowse:stop() end,
+        [{timeout, 60, fun folsom_http_checks:run_jsonp/0}]}}]}.
+
