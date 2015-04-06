@@ -18,7 +18,7 @@ You can configure the `port`, `transport`, `transport_options`, `num_acceptors`,
 * `transport_options` is the options list to pass to that module (port is handled separately), such as `[{ip, {127, 0, 0, 1}}]`
 * `num_acceptors` is the number of acceptor processes to start for the listening socket (default is `100`)
 * `dispatch` is the `cowboy_http_module` dispatch tree, which you could use to change the URL scheme
-* `enable_jsonp` if true enable a flavour of [JSON with padding][jsonp] response (see [below](#JSONP)), false by default
+* `enable_jsonp` if true enable a flavour of [JSON with padding][jsonp] response (see [below](#jsonp)), false by default
 
 #### api
 
